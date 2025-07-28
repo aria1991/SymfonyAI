@@ -1,0 +1,44 @@
+{
+    "name": "symfony/dev-assistant-bundle",
+    "type": "symfony-bundle",
+    "description": "AI Development Assistant Bundle for intelligent code analysis",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Aria Vahidi",
+            "email": "aria.vahidi2020@gmail.com"
+        }
+    ],
+    "require": {
+        "php": ">=8.2",
+        "symfony/config": "^6.4 || ^7.0",
+        "symfony/console": "^6.4 || ^7.0",
+        "symfony/dependency-injection": "^6.4 || ^7.0",
+        "symfony/framework-bundle": "^6.4 || ^7.0",
+        "symfony/string": "^6.4 || ^7.0",
+        "psr/log": "^1.1 || ^2.0 || ^3.0"
+    },
+    "require-dev": {
+        "phpstan/phpstan": "^2.1",
+        "phpunit/phpunit": "^11.5",
+        "symfony/test-pack": "^1.0"
+    },
+    "config": {
+        "sort-packages": true,
+        "allow-plugins": {
+            "*": true
+        }
+    },
+    "autoload": {
+        "psr-4": {
+            "Symfony\\AI\\DevAssistantBundle\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Symfony\\AI\\DevAssistantBundle\\Tests\\": "tests/"
+        }
+    },
+    "minimum-stability": "dev",
+    "prefer-stable": true
+}

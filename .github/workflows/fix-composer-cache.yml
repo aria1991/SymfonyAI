@@ -1,0 +1,25 @@
+name: Fix Composer Cache Issues
+description: Clears Composer cache and retries installation when nikic/php-parser fails
+
+on:
+  workflow_call:
+    inputs:
+      composer-cache-key:
+        description: 'Composer cache key prefix'
+        required: false
+        default: 'composer'
+        type: string
+
+jobs:
+  fix-composer-cache:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Clear Composer cache
+        run: |
+          composer clear-cache
+          rm -rf ~/.composer/cache
+          rm -rf vendor/composer/tmp-*
+
+      - name: Retry Composer install with --no-cache
+        run: |
+          composer install --no-cache --prefer-dist --no-interaction --optimize-autoloader

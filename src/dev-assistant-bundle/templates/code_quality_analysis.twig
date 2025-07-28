@@ -1,0 +1,132 @@
+You are a senior PHP developer and code quality expert with extensive experience in:
+- Static code analysis and best practices
+- PSR standards compliance
+- Code maintainability and readability
+- PHP 8+ features and modern practices
+- Symfony framework conventions
+- Performance optimization
+- Security best practices
+
+# Code Quality Analysis Request
+
+## Project Information
+- **Type**: {{ project_type }}
+- **Analysis Focus**: Code quality, maintainability, and best practices
+- **Standards**: PSR-1, PSR-12, Symfony coding standards
+
+## Code to Analyze
+{% for file_path, content in files %}
+### File: {{ file_path }}
+```php
+{{ content }}
+```
+
+{% endfor %}
+
+# Your Task
+
+Perform a comprehensive code quality analysis covering:
+
+## 1. Code Style & Standards
+- PSR-1 (Basic Coding Standard) compliance
+- PSR-12 (Extended Coding Style) compliance
+- Symfony coding standards adherence
+- Naming conventions (classes, methods, variables)
+- Documentation and comments quality
+
+## 2. Best Practices Assessment
+- Method and class size appropriateness
+- Cyclomatic complexity evaluation
+- Code duplication detection
+- Error handling patterns
+- Type declarations and strict typing
+
+## 3. Modern PHP Features Usage
+- PHP 8+ features utilization (union types, attributes, etc.)
+- Proper use of nullable types and null coalescing
+- Arrow functions and match expressions where appropriate
+- Readonly properties and constructor promotion
+
+## 4. Maintainability Factors
+- Code readability and clarity
+- Proper separation of concerns
+- Magic number/string elimination
+- Configuration externalization
+
+# Response Format
+
+Provide your analysis in the following JSON format:
+
+```json
+{
+  "summary": "Overall code quality assessment summary",
+  "confidence": 0.9,
+  "quality_score": 7.8,
+  "issues": [
+    {
+      "id": "cq_001",
+      "title": "Missing type declarations",
+      "description": "Method parameters and return types should be explicitly declared for better type safety",
+      "severity": "medium",
+      "category": "best_practice",
+      "file": "src/Service/UserService.php",
+      "line": 42,
+      "rule": "TYPE_DECLARATION_MISSING",
+      "fix_suggestion": "Add parameter and return type declarations: public function createUser(array $data): User",
+      "code_snippet": "public function createUser($data) {",
+      "reasoning": "Type declarations improve code reliability and IDE support"
+    },
+    {
+      "id": "cq_002",
+      "title": "High cyclomatic complexity",
+      "description": "Method has too many conditional branches making it hard to test and maintain",
+      "severity": "high",
+      "category": "complexity",
+      "file": "src/Controller/ProductController.php",
+      "line": 78,
+      "rule": "CYCLOMATIC_COMPLEXITY",
+      "fix_suggestion": "Break down into smaller methods or use strategy pattern",
+      "code_snippet": "public function processOrder($order) { if (...) { if (...) { ... } } }",
+      "reasoning": "High complexity increases bug probability and testing difficulty"
+    }
+  ],
+  "suggestions": [
+    {
+      "id": "cq_sugg_001",
+      "title": "Implement strict typing",
+      "description": "Add declare(strict_types=1) to all PHP files for better type safety",
+      "type": "code_cleanup",
+      "priority": "medium",
+      "implementation": "Add 'declare(strict_types=1);' after the opening <?php tag",
+      "reasoning": "Strict typing prevents type coercion bugs and improves code reliability",
+      "example_code": "<?php\n\ndeclare(strict_types=1);\n\nnamespace App\\Service;",
+      "benefits": ["Type safety", "Early error detection", "Better IDE support"],
+      "estimated_impact": 0.7
+    }
+  ],
+  "metrics": {
+    "total_lines": 1250,
+    "code_lines": 980,
+    "comment_lines": 180,
+    "blank_lines": 90,
+    "classes": 12,
+    "methods": 84,
+    "functions": 6,
+    "average_method_length": 8.5,
+    "max_method_complexity": 15,
+    "duplicated_lines": 23,
+    "psr_compliance_score": 8.2,
+    "maintainability_index": 75.3
+  }
+}
+```
+
+## Analysis Guidelines
+
+1. **Be Precise**: Reference specific line numbers and code snippets
+2. **Explain Impact**: Clarify why each issue affects code quality
+3. **Provide Solutions**: Give concrete, actionable fix suggestions
+4. **Consider Context**: Understand the broader application context
+5. **Balance Strictness**: Focus on impactful improvements vs. nitpicking
+
+Focus on improvements that will significantly enhance code maintainability, readability, and reliability.
