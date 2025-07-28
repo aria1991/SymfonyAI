@@ -44,6 +44,12 @@
         "phpstan/phpstan-symfony": "^1.3",
         "friendsofphp/php-cs-fixer": "^3.0"
     },
+    "conflict": {
+        "symfony/phpunit-bridge": "*"
+    },
+    "replace": {
+        "symfony/phpunit-bridge": "*"
+    },
     "suggest": {
         "monolog/monolog": "For advanced logging capabilities",
         "symfony/cache": "For caching AI analysis results",

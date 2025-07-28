@@ -51,7 +51,17 @@ jobs:
     - name: 📋 Install Dependencies
       run: |
         composer require symfony/framework-bundle:${{ matrix.symfony-version }} --no-update --no-scripts
+        composer remove symfony/phpunit-bridge --dev --no-update || true
         composer install --prefer-dist --no-progress --no-interaction --optimize-autoloader
+        
+    - name: 🔍 Verify No PHPUnit Bridge
+      run: |
+        if [ -d "vendor/symfony/phpunit-bridge" ]; then
+          echo "❌ symfony/phpunit-bridge still installed - removing..."
+          rm -rf vendor/symfony/phpunit-bridge
+        else
+          echo "✅ symfony/phpunit-bridge successfully excluded"
+        fi
         
     - name: 🧹 Code Style Check (PHP CS Fixer)
       run: vendor/bin/php-cs-fixer fix --dry-run --diff --config=.php-cs-fixer.dist.php
@@ -60,7 +70,10 @@ jobs:
       run: vendor/bin/phpstan analyse --memory-limit=1G
       
     - name: 🧪 Unit Tests (PHPUnit)
-      run: vendor/bin/phpunit --colors=always --verbose
+      run: |
+        # Ensure we're using the right PHPUnit version
+        vendor/bin/phpunit --version
+        vendor/bin/phpunit --colors=always --verbose
 
   # 🔒 Security Analysis
   security-analysis:
