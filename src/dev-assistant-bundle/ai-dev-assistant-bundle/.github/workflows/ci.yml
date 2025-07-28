@@ -1,4 +1,4 @@
-name: AI Development Assistant Bundle
+name: 🚀 CI/CD Pipeline
 
 on:
   push:
@@ -6,66 +6,162 @@ on:
   pull_request:
     branches: [ main ]
 
+env:
+  COMPOSER_CACHE_DIR: ~/.composer/cache
+
 jobs:
-  tests:
-    name: Tests (PHP ${{ matrix.php-version }})
+  # 🧪 Quality Assurance Pipeline
+  quality-assurance:
+    name: 🔍 Code Quality (PHP ${{ matrix.php-version }}, Symfony ${{ matrix.symfony-version }})
     runs-on: ubuntu-latest
     
     strategy:
+      fail-fast: false
       matrix:
         php-version: ['8.2', '8.3']
         symfony-version: ['6.4.*', '7.0.*']
         
     steps:
-    - uses: actions/checkout@v4
-    
-    - name: Setup PHP
+    - name: 📥 Checkout Code
+      uses: actions/checkout@v4
+      
+    - name: 🐘 Setup PHP ${{ matrix.php-version }}
       uses: shivammathur/setup-php@v2
       with:
         php-version: ${{ matrix.php-version }}
-        extensions: mbstring, xml, ctype, iconv, intl, pdo, pdo_mysql, dom, filter, gd, json
+        extensions: mbstring, xml, ctype, iconv, intl, pdo, dom, filter, gd, json, curl
         coverage: none
+        tools: composer:v2
         
-    - name: Validate composer.json and composer.lock
-      run: composer validate --strict
-      
-    - name: Cache Composer packages
+    - name: 📦 Get Composer Cache Directory
       id: composer-cache
-      uses: actions/cache@v3
+      run: echo "dir=$(composer config cache-files-dir)" >> $GITHUB_OUTPUT
+      
+    - name: 🗂️ Cache Composer Dependencies
+      uses: actions/cache@v4
       with:
-        path: vendor
-        key: ${{ runner.os }}-php-${{ matrix.php-version }}-${{ hashFiles('**/composer.lock') }}
+        path: ${{ steps.composer-cache.outputs.dir }}
+        key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
         restore-keys: |
-          ${{ runner.os }}-php-${{ matrix.php-version }}-
+          ${{ runner.os }}-composer-
           
-    - name: Install dependencies
+    - name: ✅ Validate Composer Configuration
+      run: composer validate --strict --no-check-all
+      
+    - name: 📋 Install Dependencies
       run: |
-        composer require symfony/framework-bundle:${{ matrix.symfony-version }} --no-update
-        composer install --prefer-dist --no-progress
+        composer require symfony/framework-bundle:${{ matrix.symfony-version }} --no-update --no-scripts
+        composer install --prefer-dist --no-progress --no-interaction --optimize-autoloader
         
-    - name: Run PHPUnit tests
-      run: vendor/bin/phpunit
+    - name: 🧹 Code Style Check (PHP CS Fixer)
+      run: vendor/bin/php-cs-fixer fix --dry-run --diff --config=.php-cs-fixer.dist.php
       
-    - name: Run PHPStan
-      run: vendor/bin/phpstan analyse
+    - name: 🔬 Static Analysis (PHPStan)
+      run: vendor/bin/phpstan analyse --memory-limit=1G
       
-    - name: Run PHP CS Fixer
-      run: vendor/bin/php-cs-fixer fix --dry-run --diff
+    - name: 🧪 Unit Tests (PHPUnit)
+      run: vendor/bin/phpunit --colors=always --verbose
 
-  security:
-    name: Security Check
+  # 🔒 Security Analysis
+  security-analysis:
+    name: 🛡️ Security Scan
     runs-on: ubuntu-latest
     
     steps:
-    - uses: actions/checkout@v4
-    
-    - name: Setup PHP
+    - name: 📥 Checkout Code
+      uses: actions/checkout@v4
+      
+    - name: 🐘 Setup PHP
       uses: shivammathur/setup-php@v2
       with:
-        php-version: '8.2'
+        php-version: '8.3'
+        tools: composer:v2
         
-    - name: Install dependencies
-      run: composer install --prefer-dist --no-progress
+    - name: 📋 Install Dependencies
+      run: composer install --prefer-dist --no-progress --no-interaction
       
-    - name: Security Check
+    - name: 🔍 Symfony Security Check
       uses: symfonycorp/security-checker-action@v5
+      
+    - name: 🛡️ Dependency Vulnerability Scan
+      run: |
+        composer audit --format=table || true
+
+  # 📊 Package Validation
+  package-validation:
+    name: 📦 Package Validation
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: 📥 Checkout Code
+      uses: actions/checkout@v4
+      
+    - name: 🐘 Setup PHP
+      uses: shivammathur/setup-php@v2
+      with:
+        php-version: '8.3'
+        tools: composer:v2
+        
+    - name: 🔍 Composer Package Validation
+      run: |
+        composer validate --strict
+        composer check-platform-reqs
+        
+    - name: 📋 Dependency Analysis
+      run: |
+        composer show --tree
+        composer outdated --direct || true
+
+  # 🎯 Integration Tests
+  integration-tests:
+    name: 🔧 Integration Tests
+    runs-on: ubuntu-latest
+    needs: [quality-assurance]
+    
+    strategy:
+      matrix:
+        symfony-version: ['6.4.*', '7.0.*']
+        
+    steps:
+    - name: 📥 Checkout Code
+      uses: actions/checkout@v4
+      
+    - name: 🐘 Setup PHP
+      uses: shivammathur/setup-php@v2
+      with:
+        php-version: '8.3'
+        extensions: mbstring, xml, ctype, iconv, intl, pdo, dom, filter, gd, json, curl
+        tools: composer:v2
+        
+    - name: 📋 Install Symfony ${{ matrix.symfony-version }}
+      run: |
+        composer require symfony/framework-bundle:${{ matrix.symfony-version }} --no-update --no-scripts
+        composer install --prefer-dist --no-progress --no-interaction
+        
+    - name: 🧪 Bundle Integration Test
+      run: |
+        # Test bundle can be loaded
+        php -r "
+        require 'vendor/autoload.php';
+        use Aria1991\AIDevAssistantBundle\AIDevAssistantBundle;
+        \$bundle = new AIDevAssistantBundle();
+        echo 'Bundle instantiated successfully: ' . get_class(\$bundle) . PHP_EOL;
+        "
+
+  # ✅ Success Notification
+  success:
+    name: ✅ All Checks Passed
+    runs-on: ubuntu-latest
+    needs: [quality-assurance, security-analysis, package-validation, integration-tests]
+    if: success()
+    
+    steps:
+    - name: 🎉 Success
+      run: |
+        echo "🎉 All CI/CD checks passed successfully!"
+        echo "✅ Code Quality: PASSED"
+        echo "🛡️ Security: PASSED" 
+        echo "📦 Package: VALIDATED"
+        echo "🔧 Integration: PASSED"
+        echo ""
+        echo "🚀 Ready for production deployment!"
