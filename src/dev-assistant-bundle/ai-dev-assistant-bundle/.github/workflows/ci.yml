@@ -51,9 +51,6 @@ jobs:
       run: |
         composer require symfony/framework-bundle:${{ matrix.symfony-version }} --no-update --no-scripts
         composer install --prefer-dist --no-progress --no-interaction --optimize-autoloader
-        else
-          echo "symfony/phpunit-bridge successfully excluded"
-        fi
         
     - name: Code Style Check (PHP CS Fixer)
       run: vendor/bin/php-cs-fixer fix --dry-run --diff --config=.php-cs-fixer.dist.php
